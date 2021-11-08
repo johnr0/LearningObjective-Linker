@@ -1,0 +1,48 @@
+body, html {
+  height: 100%;
+  width: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Open Sans;
+}
+
+#app{
+  height:100%;
+}
+.app-container{
+  height: 100%;
+}
+
+.home{
+  height: 100%;
+}
+
+.bottom{
+  height: 300px;
+}
+
+.upper{
+  height: calc(100% - 300px);
+}
+
+.datatable{
+  height: 100%;
+}
+
+.article{
+  height: 100%;
+}
+
+.linker{
+  border: solid 1px #333333;
+  border-radius: 4px;
+  padding: 2px;
+  
+}
