@@ -4,6 +4,7 @@ import Article from './Article'
 import Annotation from './Annotation'
 
 
+
 class Home extends Component{
   constructor(props) {
 		super(props);
@@ -34,6 +35,7 @@ class Home extends Component{
       candidate_hovered: -1,
       candidate_selected: -1,
 
+      embedding_model: undefined, 
 
 
 
@@ -198,7 +200,6 @@ class Home extends Component{
       condition_count = condition_count +1
     }
     console.log(sql_query)
-    
     var comb_columns = []
     for(var i in this.state.columnDefs){
       var col_name = this.state.columnDefs[i].field
@@ -335,6 +336,8 @@ class Home extends Component{
             }else if(val1<val2){
               comp='<'
             }
+          }else if(this.state.candidate_option_double_target=='similar'){
+            comp = '≈'
           }else{
             comp='/'
           }
@@ -395,7 +398,7 @@ class Home extends Component{
         new_query2 = this.search_and_add_to_query(new_query2, condition_row, condition_column)
         condition_count = condition_count +1
       }
-      if(this.state.candidate_option_double_target=='nonratio'){
+      if(this.state.candidate_option_double_target=='nonratio' || this.state.candidate_option_double_target=='similar'){
         var new_query = '('+new_query1+')'+comp+'('+new_query2+')'
         var target = JSON.parse(JSON.stringify(this.state.selected_target_columns))
         queries.push([new_query, new_queried_columns, target, 'comp|'+comp])
@@ -449,6 +452,8 @@ class Home extends Component{
         }else if(val1<val2){
           comp='<'
         }
+      }else if(this.state.candidate_option_double_target=='similar'){
+        comp='≈'
       }else{
         comp='/'
       }
@@ -539,7 +544,7 @@ class Home extends Component{
 
         new_queried_columns.sort()
 
-        if(this.state.candidate_option_double_target=='nonratio'){
+        if(this.state.candidate_option_double_target=='nonratio' || this.state.candidate_option_double_target=='similar'){
           var new_query = '('+new_query1+')'+comp+'('+new_query2+')'
           var target = JSON.parse(JSON.stringify(this.state.selected_target_columns))
           queries.push([new_query, new_queried_columns, target, 'comp|'+comp])

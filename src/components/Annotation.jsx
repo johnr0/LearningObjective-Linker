@@ -1,4 +1,6 @@
 import React, {Component} from 'react'
+import stringSimilarity from 'string-similarity'
+
 
 class Annotation extends Component{
     startSelecting(){
@@ -115,18 +117,87 @@ class Annotation extends Component{
     }
 
     renderCandidates(){
-        return this.props.mother_state.candidate_statements.map((val, idx)=>{
+        var cur_text = this.props.mother_state.list[this.props.mother_state.selected_list].chosen_text
+        var cur_queries = [10.0]
+        if(this.props.mother_state.selected_target_columns.length==2){
+            if(this.props.mother_state.candidate_option_double_target=='ratio'){
+                cur_queries.push(10.0)
+            }
+        }
+        // var cqt=[]
+        for(var i in this.props.mother_state.candidate_statements){
+            if(i==0){
+                continue
+            }
+            if(this.props.mother_state.selected_target_columns.length==2){
+                if(this.props.mother_state.candidate_option_double_target=='ratio'){
+                    if(i==1){
+                        continue
+                    }
+                }
+            }
+            var curq = 0
+            var cur_count = 0
+            var cur_can = this.props.mother_state.candidate_statements[i]
+            for(var j in cur_can[2]){
+                curq = curq+stringSimilarity.compareTwoStrings(cur_text, cur_can[2][j].split('|')[0])
+                cur_count = cur_count + 1
+            }
+            for(var j in cur_can[1]){
+                for(var k in this.props.mother_state.rowData){
+                    var a_row = this.props.mother_state.rowData[k]
+                    if(a_row['_id']==cur_can[1][j].split('|')[1]){
+                        curq = curq+stringSimilarity.compareTwoStrings(cur_text, cur_can[1][j].split('|')[0]+' '+a_row[cur_can[1][j].split('|')[0]])
+                        cur_count = cur_count+1
+                    }
+                }
+            }
+            
+            cur_queries.push(curq/cur_count)
+            // cqt.push(cur_can[0])
+        }
+        // var sim_result = stringSimilarity.findBestMatch(this.props.mother_state.list[this.props.mother_state.selected_list].chosen_text, cur_queries)
+        console.log(cur_queries)
+        var sorted = cur_queries.slice().sort(function(a,b){return b-a})
+        console.log(sorted)
+       
+        var ranks = []
+        for(var i in cur_queries){
+            var idx = sorted.indexOf(cur_queries[i])
+            while(ranks.indexOf(idx)!=-1){
+                idx= idx+1
+            }
+            ranks.push(idx)
+        }
+
+        // var ranks = cur_queries.map(function(v){ return sorted.indexOf(v) });
+        console.log(ranks)
+        console.log(sorted)
+        return ranks.map((v, idx)=>{
+            var val = this.props.mother_state.candidate_statements[v]
             var backgroundColor
-            if(this.props.mother_state.candidate_selected==idx){
+            if(this.props.mother_state.candidate_selected==v){
                 backgroundColor = '#888888'
             }else{
-                backgroundColor=''
+                backgroundColor= ''
             }
-            return (<div value={'candidate_'+idx.toString()} key={'candidate_'+idx.toString()} onClick={this.chooseCandidate.bind(this, idx)}
+            return (<div value={'candidate_'+idx.toString()} key={'candidate_'+idx.toString()} onClick={this.chooseCandidate.bind(this, v)}
                 style={{backgroundColor:backgroundColor}}>
                 {val[0]}
             </div>)
         })
+        // return this.props.mother_state.candidate_statements.map((val, idx)=>{
+        //     var backgroundColor
+        //     if(this.props.mother_state.candidate_selected==idx){
+        //         backgroundColor = '#888888'
+        //     }else{
+        //         backgroundColor=''
+        //     }
+        //     return (<div value={'candidate_'+idx.toString()} key={'candidate_'+idx.toString()} onClick={this.chooseCandidate.bind(this, idx)}
+        //         style={{backgroundColor:backgroundColor}}>
+        //         {val[0]}
+        //     </div>)
+        // })
     }
 
     single_target_change_canditype(){
@@ -144,19 +215,19 @@ class Annotation extends Component{
         }
     }
 
-    double_target_change_canditype(){
+    double_target_change_canditype(cls){
         var _this = this
-        if(this.props.mother_state.candidate_option_double_target=='ratio'){
-            this.props.mother_this.setState({candidate_option_double_target: 'nonratio'}, function(){
+        // if(this.props.mother_state.candidate_option_double_target=='ratio'){
+            this.props.mother_this.setState({candidate_option_double_target: cls}, function(){
                 _this.props.mother_this.generate_candidate_statements()
                 _this.props.mother_this.refreshTable()
             })
-        }else{
-            this.props.mother_this.setState({candidate_option_double_target: 'ratio'}, function(){
-                _this.props.mother_this.generate_candidate_statements()
-                _this.props.mother_this.refreshTable()
-            })
-        }
+        // }else{
+        //     this.props.mother_this.setState({candidate_option_double_target: 'ratio'}, function(){
+        //         _this.props.mother_this.generate_candidate_statements()
+        //         _this.props.mother_this.refreshTable()
+        //     })
+        // }
     }
 
     candidate_confirm(){
@@ -575,11 +646,15 @@ class Annotation extends Component{
                             {this.props.mother_state.selected_target_columns.length==2 && 
                             <div>
                                 <label style={{marginRight:'20px'}}>
-                                    <input name="double_target_selection" type="radio" onChange={this.double_target_change_canditype.bind(this)} checked={this.props.mother_state.candidate_option_double_target=='nonratio'}/>
-                                    <span>Non-Ratio</span>
+                                    <input name="double_target_selection" type="radio" onChange={this.double_target_change_canditype.bind(this, 'nonratio')} checked={this.props.mother_state.candidate_option_double_target=='nonratio'}/>
+                                    <span>Non-Ratio Comparison</span>
                                 </label>  
+                                <label style={{marginRight:'20px'}}>
+                                    <input name="double_target_selection" type="radio" onChange={this.double_target_change_canditype.bind(this, 'similar')} checked={this.props.mother_state.candidate_option_double_target=='similar'}/>
+                                    <span>Similar</span>
+                                </label>
                                 <label>
-                                    <input name="double_target_selection" type="radio" onChange={this.double_target_change_canditype.bind(this)} checked={this.props.mother_state.candidate_option_double_target=='ratio'}/>
+                                    <input name="double_target_selection" type="radio" onChange={this.double_target_change_canditype.bind(this, 'ratio')} checked={this.props.mother_state.candidate_option_double_target=='ratio'}/>
                                     <span>Ratio</span>
                                 </label>    
                             </div>}
