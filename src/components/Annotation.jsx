@@ -15,7 +15,7 @@ class Annotation extends Component{
         this.props.mother_this.setState({
             selected_list:false, 
             action_state: 'idle',
-            table_selection:'target',
+            table_selection:'target1',
             selected_target_columns: [],
             selected_condition_columns: [],
             selected_query_type: '', 
@@ -58,7 +58,7 @@ class Annotation extends Component{
             this.props.mother_this.setState({
                 selected_list:value, 
                 action_state: 'to_link_text',
-                table_selection:'target',
+                table_selection:'target1',
                 selected_target_columns: JSON.parse(JSON.stringify(this.props.mother_state.list[value].selected_target_columns)),
                 selected_condition_columns: JSON.parse(JSON.stringify(this.props.mother_state.list[value].selected_condition_columns)),
                 selected_query_type: this.props.mother_state.list[value].selected_query_type, 
@@ -200,19 +200,19 @@ class Annotation extends Component{
         // })
     }
 
-    single_target_change_canditype(){
+    single_target_change_canditype(cls){
         var _this = this
-        if(this.props.mother_state.candidate_option_single_target=='rank'){
-            this.props.mother_this.setState({candidate_option_single_target: 'nonrank', candidate_selected:-1}, function(){
-                _this.props.mother_this.generate_candidate_statements()
-                _this.props.mother_this.refreshTable()
+        // if(this.props.mother_state.candidate_option_single_target=='rank'){
+            this.props.mother_this.setState({candidate_option_single_target: cls, candidate_selected:-1}, function(){
+                // _this.props.mother_this.generate_candidate_statements()
+                // _this.props.mother_this.refreshTable()
             })
-        }else{
-            this.props.mother_this.setState({candidate_option_single_target: 'rank', candidate_selected:-1}, function(){
-                _this.props.mother_this.generate_candidate_statements()
-                _this.props.mother_this.refreshTable()
-            })
-        }
+        // }else{
+        //     this.props.mother_this.setState({candidate_option_single_target: 'rank', candidate_selected:-1}, function(){
+        //         _this.props.mother_this.generate_candidate_statements()
+        //         _this.props.mother_this.refreshTable()
+        //     })
+        // }
     }
 
     double_target_change_canditype(cls){
@@ -220,8 +220,8 @@ class Annotation extends Component{
         console.log(cls)
         // if(this.props.mother_state.candidate_option_double_target=='ratio'){
             this.props.mother_this.setState({candidate_option_double_target: cls}, function(){
-                _this.props.mother_this.generate_candidate_statements()
-                _this.props.mother_this.refreshTable()
+                // _this.props.mother_this.generate_candidate_statements()
+                // _this.props.mother_this.refreshTable()
             })
         // }else{
         //     this.props.mother_this.setState({candidate_option_double_target: 'ratio'}, function(){
@@ -546,7 +546,7 @@ class Annotation extends Component{
         this.props.mother_this.setState({
             selected_list:false, 
             action_state: 'idle',
-            table_selection:'target',
+            table_selection:'target1',
             selected_target_columns: [],
             selected_condition_columns: [],
             selected_query_type: '', 
@@ -605,6 +605,100 @@ class Annotation extends Component{
     
 
     render(){
+
+        var query_options = []
+        var selected_target_columns1 = this.props.mother_state.selected_target_columns1
+        var selected_target_columns2 = this.props.mother_state.selected_target_columns2
+        var selected_condition_columns1 = this.props.mother_state.selected_condition_columns1
+        var selected_condition_columns2 = this.props.mother_state.selected_condition_columns2
+        if(selected_target_columns1.length==1 && selected_condition_columns1.length==0 && selected_target_columns2.length==0 && selected_condition_columns2.length==0){
+            query_options.push('noncomp_specific')
+            query_options.push('comp_rank')
+        }else if(selected_target_columns1.length==1 && selected_condition_columns1.length==1 && selected_target_columns2.length==0 && selected_condition_columns2.length==0){
+            if(selected_target_columns1[0].split('|')[1]==selected_condition_columns1[0].split('|')[1]){
+                query_options.push('noncomp_specific')
+                query_options.push('comp_rank')
+            }else{
+                query_options.push('noncomp_range_avg')
+                query_options.push('noncomp_range_sum')
+            }
+        }else if(selected_target_columns1.length==0 && selected_condition_columns1.length>0 && selected_target_columns2.length==0 && selected_condition_columns2.length==0){
+            query_options.push('noncomp_range_count')
+        }else if(selected_target_columns1.length>=1 && selected_target_columns2.length==0 && selected_condition_columns2.length==0){
+            query_options.push('noncomp_range_avg')
+            query_options.push('noncomp_range_sum')
+        }else if(selected_target_columns1.length==1 && selected_condition_columns1.length<=1 && selected_target_columns2.length==1 && selected_condition_columns2.length<=1){
+            var ranged1 = false
+            var ranged2 = false
+            if(selected_condition_columns1.length==1){
+                if(selected_target_columns1[0].split('|')[1]!=selected_condition_columns1[0].split('|')[1]){
+                    ranged1=true
+                }
+            }
+            if(selected_condition_columns2.length==1){
+                if(selected_target_columns2[0].split('|')[1]!=selected_condition_columns2[0].split('|')[1]){
+                    ranged2=true
+                }
+            }
+            if(ranged1 && ranged2){
+                query_options.push('comp_range1_range2_nonratio')
+                query_options.push('comp_range1_range2_ratio')
+            }else if(ranged1 && ranged2==false){
+                query_options.push('comp_range1_specific2_nonratio')
+                query_options.push('comp_range1_specific2_ratio')
+            }else if(ranged1==false && ranged2){
+                query_options.push('comp_specific1_range2_nonratio')
+                query_options.push('comp_specific1_range2_ratio')
+            }else{
+                query_options.push('comp_specific1_specific2_nonratio')
+                query_options.push('comp_specific1_specific2_ratio')
+            }
+            
+        }else if(selected_target_columns1.length==1 && selected_condition_columns1.length==0 && selected_target_columns2.length==1 && selected_condition_columns2.length==0){
+            query_options.push('comp_specific1_specific2_ratio')
+            query_options.push('comp_specific1_specific2_ratio')
+        }else if(selected_target_columns1.length==0 && selected_condition_columns1.length>0 && selected_target_columns2.length==0 && selected_condition_columns2.length>0){
+            query_options.push('comp_range_count_ratio')
+            query_options.push('comp_range_count_nonratio')
+        }else if(selected_target_columns1.length>=1 && selected_condition_columns1.length>=0 && selected_target_columns2.length>=1 && selected_condition_columns2.length>=0){
+            var ranged1 = true
+            var ranged2 = true
+            if(selected_target_columns1.length==1){
+                if(selected_condition_columns1.length==0){
+                    ranged1=false
+                }else if(selected_condition_columns1.length==1){
+                    if(selected_target_columns1[0].split('|')[1]!=selected_condition_columns1[0].split('|')[1]){
+                        ranged1=true
+                    }else{
+                        ranged1=false
+                    }
+                }
+            }
+            if(selected_target_columns2.length==1){
+                if(selected_condition_columns2.length==0){
+                    ranged2=false
+                }else if(selected_condition_columns2.length==1){
+                    if(selected_target_columns2[0].split('|')[1]!=selected_condition_columns2[0].split('|')[1]){
+                        ranged2=true
+                    }else{
+                        ranged2=false
+                    }
+                }
+            }
+            if(ranged1 && ranged2){
+                query_options.push('comp_range1_range2_nonratio')
+                query_options.push('comp_range1_range2_ratio')
+            }else if(ranged1 && ranged2==false){
+                query_options.push('comp_range1_specific2_nonratio')
+                query_options.push('comp_range1_specific2_ratio')
+            }else if(ranged1==false && ranged2){
+                query_options.push('comp_specific1_range2_nonratio')
+                query_options.push('comp_specific1_range2_ratio')
+            }else{
+                query_options.push('comp_specific1_specific2_nonratio')
+                query_options.push('comp_specific1_specific2_ratio')
+            }
+        }
         
 
         return (<div style={{height: '100%', padding:'20px', overflowY:'scroll'}}>
@@ -638,20 +732,101 @@ class Annotation extends Component{
                 {this.props.mother_state.action_state=='not_yet_candidate' && this.props.mother_state.selected_list!=false && <div>
                     <div><span style={{color:'#888888'}}>Selected part:</span> <span style={{backgroundColor:'rgba(68, 170, 255, 0.3)'}}>{this.props.mother_state.list[this.props.mother_state.selected_list].chosen_text}</span></div>
                     {this.props.mother_state.action_state=='not_yet_candidate' && <div>
-                        <div style={{display:'inline-flex'}}>
+                        <div>
                             <div>Select the part of the table that corresponds to the selected part of the article.</div>
                             <div>
-                                <span className='btn' style={{verticalAlign:'top', lineHeight:'20px', height:'20px', backgroundColor:(this.props.mother_state.table_selection!='target')?'#eeeeee':''}} onClick={this.chooseTableSelectionMethod.bind(this, 'target')}>Select target</span>
-                                <span className='btn' style={{verticalAlign:'top', lineHeight:'20px', height:'20px', backgroundColor:(this.props.mother_state.table_selection!='condition')?'#eeeeee':''}} onClick={this.chooseTableSelectionMethod.bind(this, 'condition')}>Select condition</span>
+                                <span className='btn' style={{verticalAlign:'top', lineHeight:'20px', height:'20px', backgroundColor:(this.props.mother_state.table_selection!='target1')?'#eeeeee':''}} onClick={this.chooseTableSelectionMethod.bind(this, 'target1')}>Select target1</span>
+                                <span className='btn' style={{verticalAlign:'top', lineHeight:'20px', height:'20px', backgroundColor:(this.props.mother_state.table_selection!='condition1')?'#eeeeee':''}} onClick={this.chooseTableSelectionMethod.bind(this, 'condition1')}>Select condition1</span>
+                            </div>
+                            <div>
+                                <span className='btn' style={{verticalAlign:'top', lineHeight:'20px', height:'20px', backgroundColor:(this.props.mother_state.table_selection!='target2')?'#eeeeee':''}} onClick={this.chooseTableSelectionMethod.bind(this, 'target2')}>Select target2</span>
+                                <span className='btn' style={{verticalAlign:'top', lineHeight:'20px', height:'20px', backgroundColor:(this.props.mother_state.table_selection!='condition2')?'#eeeeee':''}} onClick={this.chooseTableSelectionMethod.bind(this, 'condition2')}>Select condition2</span>
                             </div>
                         </div>
                         <div style={{paddingTop:'10px', paddingLeft:'10px', paddingRight:'10px',display: 'flex', position:'relative'}}>
-                            <div sttle={{lineHeight:'22px', marginRight:'20px'}}>List of candidates.</div> 
-                            {this.props.mother_state.selected_target_columns.length==1 && 
+                            <div sttle={{lineHeight:'22px', marginRight:'20px'}}>List of candidates.</div>
+                            <div>
+                                {query_options.indexOf('noncomp_specific')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'noncompt_specific')} checked={this.props.mother_state.candidate_option_single_target=='noncomp_specific'}/>
+                                        <span>Non-comparison Specific</span>
+                                </label>}
+                                {query_options.indexOf('comp_rank')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_rank')} checked={this.props.mother_state.candidate_option_single_target=='comp_rank'}/>
+                                        <span>Rank</span>
+                                </label>}
+                                {query_options.indexOf('noncomp_range_avg')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'noncomp_range_avg')} checked={this.props.mother_state.candidate_option_single_target=='noncomp_range_avg'}/>
+                                        <span>Non-Comparison Range Average</span>
+                                </label>}
+                                {query_options.indexOf('noncomp_range_sum')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'noncomp_range_sum')} checked={this.props.mother_state.candidate_option_single_target=='noncomp_range_sum'}/>
+                                        <span>Non-Comparison Range Sum</span>
+                                </label>}
+                                {query_options.indexOf('noncomp_range_count')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'noncomp_range_count')} checked={this.props.mother_state.candidate_option_single_target=='noncomp_range_count'}/>
+                                        <span>Non-Comparison Range Count</span>
+                                </label>}
+                                {query_options.indexOf('comp_range1_range2_nonratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_range1_range2_nonratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_range1_range2_nonratio'}/>
+                                        <span>Comparison Range on 1, Range on 2, Non Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_specific1_range2_nonratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_specific1_range2_nonratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_specific1_range2_nonratio'}/>
+                                        <span>Comparison Specific on 1, Range on 2, Non Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_range1_specific2_nonratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_range1_specific2_nonratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_range1_specific2_nonratio'}/>
+                                        <span>Comparison Range on 1, Specific on 2, Non Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_specific1_specific2_nonratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_specific1_specific2_nonratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_specific1_specific2_nonratio'}/>
+                                        <span>Comparison Specific on 1, Specific on 2, Non Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_range1_range2_ratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_range1_range2_ratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_range1_range2_ratio'}/>
+                                        <span>Comparison Range on 1, Range on 2, Non Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_specific1_range2_ratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_specific1_range2_ratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_specific1_range2_ratio'}/>
+                                        <span>Comparison Specific on 1, Range on 2, Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_range1_specific2_ratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_range1_specific2_ratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_range1_specific2_ratio'}/>
+                                        <span>Comparison Range on 1, Specific on 2, Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_specific1_specific2_ratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_specific1_specific2_ratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_specific1_specific2_ratio'}/>
+                                        <span>Comparison Specific on 1, Specific on 2, Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_range_count_ratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_range_count_ratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_range_count_ratio'}/>
+                                        <span>Comparison on Count, Ratio</span>
+                                </label>}
+                                {query_options.indexOf('comp_range_count_nonratio')!=-1 &&
+                                    <label style={{marginRight:'20px'}}>
+                                        <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this, 'comp_range_count_nonratio')} checked={this.props.mother_state.candidate_option_single_target=='comp_range_count_nonratio'}/>
+                                        <span>Comparison on Count, Non-Ratio</span>
+                                </label>}
+                            </div>
+                            {/* {this.props.mother_state.selected_target_columns1.length==1 && this.props.mother_state.selected_target_columns2.length==0 && 
                             <div>
                                 <label style={{marginRight:'20px'}}>
                                     <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this)} checked={this.props.mother_state.candidate_option_single_target=='nonrank'}/>
-                                    <span>Non-Rank</span>
+                                    <span>Non-comparison</span>
                                 </label>  
                                 <label>
                                     <input name="single_target_selection" type="radio" onChange={this.single_target_change_canditype.bind(this)} checked={this.props.mother_state.candidate_option_single_target=='rank'}/>
@@ -672,14 +847,14 @@ class Annotation extends Component{
                                     <input name="double_target_selection" type="radio" onChange={this.double_target_change_canditype.bind(this, 'ratio')} checked={this.props.mother_state.candidate_option_double_target=='ratio'}/>
                                     <span>Ratio</span>
                                 </label>    
-                            </div>}
+                            </div>} */}
                             <div className='btn' style={{height:'25px', lineHeight:'25px', position:'absolute', right:'10px'}} disabled={this.props.mother_state.candidate_selected==-1} onClick={this.candidate_confirm.bind(this)}>Select the query</div>
                         
                         </div>
                         {typeof(this.props.mother_state.candidate_statements)!='string' && <div style={{paddingLeft:'10px',paddingRight:'10px'}}>
                             
                             <div style={{display:'block', padding:'5px', margin:'2px', borderTop: 'solid 1px #333333'}}>
-                                {this.renderCandidates()}
+                                 {/*TODO: unleash it {this.renderCandidates()} */}
                             </div>
                         </div>}
                         <div className='btn' onClick={this.cancelSelecting.bind(this)}>Cancel</div>

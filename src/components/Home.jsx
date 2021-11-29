@@ -18,21 +18,25 @@ class Home extends Component{
       list: {}, 
 
       
-      table_selection:'target',
-      selected_target_columns: [],
-      selected_condition_columns: [],
+      table_selection:'target1',
+      selected_target_columns1: [],
+      selected_target_columns2: [],
+      selected_condition_columns1: [],
+      selected_condition_columns2: [],
       selected_query_type: '', 
       query: '',
 
-      selected_target_indexes: [],
-      selected_condition_indexes: [],
+      selected_target_indexes1: [],
+      selected_target_indexes2: [],
+      selected_condition_indexes1: [],
+      selected_condition_indexes2: [],
       selected_query_index: undefined,
       cur_query_index: undefined, 
 
       // for candidate selection
       candidate_statements: 'none', 
 
-      candidate_option_single_target: 'nonrank', 
+      candidate_option_single_target: 'noncomp_specific', 
       candidate_option_double_target: 'nonratio', 
 
       candidate_hovered: -1,
@@ -45,10 +49,14 @@ class Home extends Component{
       // rowData: undefined,
 			columnDefs: [
 				{headerName: "Country", field: "country", sortable:true, filter: 'agTextColumnFilter', cellStyle: params => {
-              if (this.state.selected_target_columns.indexOf('country|'+params.data._id)!=-1) {
-                  return {backgroundColor: '#00ff88'};
-              }else if (this.state.selected_condition_columns.indexOf('country|'+params.data._id)!=-1) {
-                return {backgroundColor: '#ffff00'};
+              if (this.state.selected_target_columns1.indexOf('country|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#59ff85'};
+              }else if (this.state.selected_condition_columns1.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#a8ffbf'};
+              }else if (this.state.selected_target_columns2.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#4da0ff'};
+              }else if (this.state.selected_condition_columns2.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#9ccaff'};
               }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
                 if(this.state.candidate_statements[this.state.candidate_selected][1].indexOf('country|'+params.data._id)!=-1){
                   return {backgroundColor:'#ffffaa'}
@@ -59,10 +67,14 @@ class Home extends Component{
           }
         },
 				{headerName: "Sleep Hour", field: "sleep_hour", sortable:true, filter: 'agNumberColumnFilter', cellStyle: params => {
-              if (this.state.selected_target_columns.indexOf('sleep_hour|'+params.data._id)!=-1) {
-                  return {backgroundColor: '#00ff88'};
-              }else if (this.state.selected_condition_columns.indexOf('sleep_hour|'+params.data._id)!=-1) {
-                return {backgroundColor: '#ffff00'};
+              if (this.state.selected_target_columns1.indexOf('sleep_hour|'+params.data._id)!=-1) {
+                return {backgroundColor: '#59ff85'};
+              }else if (this.state.selected_condition_columns1.indexOf('sleep_hour|'+params.data._id)!=-1) {
+                return {backgroundColor: '#a8ffbf'};
+              }else if (this.state.selected_target_columns2.indexOf('sleep_hour|'+params.data._id)!=-1) {
+                return {backgroundColor: '#4da0ff'};
+              }else if (this.state.selected_condition_columns2.indexOf('sleep_hour|'+params.data._id)!=-1) {
+                return {backgroundColor: '#9ccaff'};
               }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
                 if(this.state.candidate_statements[this.state.candidate_selected][1].indexOf('sleep_hour|'+params.data._id)!=-1){
                   return {backgroundColor:'#ffffaa'}
@@ -73,11 +85,15 @@ class Home extends Component{
           }
         },
 				{headerName: "Eating, Drinking Hour", field: "eating_drinking_hour", sortable:true, filter: 'agNumberColumnFilter', cellStyle: params => {
-              if (this.state.selected_target_columns.indexOf('eating_drinking_hour|'+params.data._id)!=-1) {
-                  return {backgroundColor: '#00ff88'};
-              }else if (this.state.selected_condition_columns.indexOf('eating_drinking_hour|'+params.data._id)!=-1) {
-                return {backgroundColor: '#ffff00'};
-              }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
+                if (this.state.selected_target_columns1.indexOf('eating_drinking_hour|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#59ff85'};
+                }else if (this.state.selected_condition_columns1.indexOf('eating_drinking_hour|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#a8ffbf'};
+                }else if (this.state.selected_target_columns2.indexOf('eating_drinking_hour|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#4da0ff'};
+                }else if (this.state.selected_condition_columns2.indexOf('eating_drinking_hour|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#9ccaff'};
+                }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
                 if(this.state.candidate_statements[this.state.candidate_selected][1].indexOf('eating_drinking_hour|'+params.data._id)!=-1){
                   return {backgroundColor:'#ffffaa'}
                 }
@@ -87,11 +103,15 @@ class Home extends Component{
           }
         },
         {headerName: "GDP Unpaid", field: "gdp_unpaid", sortable:true, filter: 'agNumberColumnFilter', cellStyle: params => {
-              if (this.state.selected_target_columns.indexOf('gdp_unpaid|'+params.data._id)!=-1) {
-                  return {backgroundColor: '#00ff88'};
-              }else if (this.state.selected_condition_columns.indexOf('gdp_unpaid|'+params.data._id)!=-1) {
-                return {backgroundColor: '#ffff00'};
-              }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
+                if (this.state.selected_target_columns1.indexOf('gdp_unpaid|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#59ff85'};
+                }else if (this.state.selected_condition_columns1.indexOf('gdp_unpaid|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#a8ffbf'};
+                }else if (this.state.selected_target_columns2.indexOf('gdp_unpaid|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#4da0ff'};
+                }else if (this.state.selected_condition_columns2.indexOf('gdp_unpaid|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#9ccaff'};
+                }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
                 if(this.state.candidate_statements[this.state.candidate_selected][1].indexOf('gdp_unpaid|'+params.data._id)!=-1){
                   return {backgroundColor:'#ffffaa'}
                 }
@@ -101,11 +121,15 @@ class Home extends Component{
           }
         },
         {headerName: "OECD", field:'oecd', sortable:true, filter: true, cellStyle: params => {
-              if (this.state.selected_target_columns.indexOf('oecd|'+params.data._id)!=-1) {
-                  return {backgroundColor: '#00ff88'};
-              }else if (this.state.selected_condition_columns.indexOf('oecd|'+params.data._id)!=-1) {
-                return {backgroundColor: '#ffff00'};
-              }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
+                if (this.state.selected_target_columns1.indexOf('oecd|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#59ff85'};
+                }else if (this.state.selected_condition_columns1.indexOf('oecd|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#a8ffbf'};
+                }else if (this.state.selected_target_columns2.indexOf('oecd|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#4da0ff'};
+                }else if (this.state.selected_condition_columns2.indexOf('oecd|'+params.data._id)!=-1) {
+                  return {backgroundColor: '#9ccaff'};
+                }else if (typeof(this.state.candidate_statements)!='string' && this.state.candidate_selected!=-1){
                 if(this.state.candidate_statements[this.state.candidate_selected][1].indexOf('oecd|'+params.data._id)!=-1){
                   return {backgroundColor:'#ffffaa'}
                 }
@@ -775,11 +799,15 @@ class Home extends Component{
             single_column['sortable'] = true
             single_column['filter'] = 'agTextColumnFilter'
             single_column['cellStyle'] = params => {
-              if (_this.state.selected_target_columns.indexOf(params.colDef.field+'|'+params.data._id)!=-1) {
-                            return {backgroundColor: '#00ff88'};
-                        }else if (_this.state.selected_condition_columns.indexOf(params.colDef.field+'|'+params.data._id)!=-1) {
-                          return {backgroundColor: '#ffff00'};
-                        }else if (typeof(_this.state.candidate_statements)!='string' && _this.state.candidate_selected!=-1){
+              if (_this.state.selected_target_columns1.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#59ff85'};
+              }else if (_this.state.selected_condition_columns1.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#a8ffbf'};
+              }else if (_this.state.selected_target_columns2.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#4da0ff'};
+              }else if (_this.state.selected_condition_columns2.indexOf('country|'+params.data._id)!=-1) {
+                return {backgroundColor: '#9ccaff'};
+              }else if (typeof(_this.state.candidate_statements)!='string' && _this.state.candidate_selected!=-1){
                           if(_this.state.candidate_statements[_this.state.candidate_selected][1].indexOf(params.colDef.field+'|'+params.data._id)!=-1){
                             return {backgroundColor:'#ffffaa'}
                           }
