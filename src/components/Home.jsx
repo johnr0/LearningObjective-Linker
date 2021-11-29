@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import DataTable from './DataTable';
 import Article from './Article'
 import Annotation from './Annotation'
+import Papa from 'papaparse'
 
 
 
@@ -10,6 +11,8 @@ class Home extends Component{
 		super(props);
 
 		this.state = {
+      
+
       action_state: 'idle', // idle, to_select_text, selecting_text, not_yet_candidate, candidates, candidate_selected 
       selected_list: false, 
       list: {}, 
@@ -37,8 +40,9 @@ class Home extends Component{
 
       embedding_model: undefined, 
 
-
-
+      // article: undefined,
+      // columnDefs: undefined, 
+      // rowData: undefined,
 			columnDefs: [
 				{headerName: "Country", field: "country", sortable:true, filter: 'agTextColumnFilter', cellStyle: params => {
               if (this.state.selected_target_columns.indexOf('country|'+params.data._id)!=-1) {
@@ -706,23 +710,141 @@ class Home extends Component{
 
   }
 
-  render(){
-    return (
-      <div className='home'>
-        <div className='row upper' style={{margin: 0}}>
-          <div className='col s6 datatable'>
-            <DataTable mother_state={this.state} mother_this={this}></DataTable>
-          </div>
-          <div className='col s6 article'>
-            <Article mother_state={this.state} mother_this={this}></Article>
-          </div>
-        </div>
-        
-        <div className='col s12 bottom'>
-          <Annotation mother_state={this.state} mother_this={this}></Annotation>
-        </div>
-      </div>)
+  inputArticle(){
+    var val = document.getElementById('article_input_area').value
+    if(val!=''){
+      this.setState({article:val})
+    }
+    
   }
+
+  inputData(){
+    var val = document.getElementById('data_input_area').value
+    var ext = val.split('.').pop()
+    if(ext=='csv'){
+      this.inputCSVData()
+    }
+  }
+
+  inputCSVData(){
+    var files = document.getElementById('data_input_area').files
+    console.log(files)
+    if(files.length==1){
+      var file = files[0]
+      console.log(file)
+      var _this = this
+      Papa.parse(file, {
+        complete: function(results){
+          console.log(results.data)
+          var data = results.data
+          var rowData = []
+          var types = []
+          
+          for(var j=0; j<data[0].length; j++){
+            var is_number = true
+            for(var i=1; i<data.length; i++){
+              if(/^-?[\d.]+(?:e-?\d+)?$/.test(data[i][j])==false){
+                is_number=false
+              }
+            }
+            types.push(is_number)
+            
+          }
+
+
+          for(var i=1; i<data.length; i++){
+            var single_row = {}
+            single_row['_id'] = (Math.random() + 1).toString(36).substring(7);
+            for(var j=0; j<data[0].length; j++){
+              var d=data[i][j]
+              if(types[j]){
+                d = parseFloat(d)
+              }
+              single_row[data[0][j]] = d
+            }
+            console.log(single_row)
+            rowData.push(single_row)
+          }
+
+          var columnDefs = []
+          for(var i=0; i<data[0].length; i++){
+            var single_column = {}
+            var col_name = data[0][i]
+            single_column['headerName'] = col_name
+            single_column['field'] = col_name
+            single_column['sortable'] = true
+            single_column['filter'] = 'agTextColumnFilter'
+            single_column['cellStyle'] = params => {
+              if (_this.state.selected_target_columns.indexOf(params.colDef.field+'|'+params.data._id)!=-1) {
+                            return {backgroundColor: '#00ff88'};
+                        }else if (_this.state.selected_condition_columns.indexOf(params.colDef.field+'|'+params.data._id)!=-1) {
+                          return {backgroundColor: '#ffff00'};
+                        }else if (typeof(_this.state.candidate_statements)!='string' && _this.state.candidate_selected!=-1){
+                          if(_this.state.candidate_statements[_this.state.candidate_selected][1].indexOf(params.colDef.field+'|'+params.data._id)!=-1){
+                            return {backgroundColor:'#ffffaa'}
+                          }
+                          return null
+                        }
+                        return null;
+            }
+            columnDefs.push(single_column)
+          }
+          _this.setState({rowData, columnDefs})
+        }
+      })
+    }
+  }
+
+  render(){
+    if(this.state.article==undefined){
+      return (
+        <div className='home' style={{marginLeft: 50, marginRight: 50}}>
+          <div className='row' style={{margin: 0}}>
+            <h3>Input your article.</h3>
+          </div>
+          <div className='row' style={{margin: 0}}>
+            <textarea id='article_input_area'
+              value="MARGARET THATCHER, a former British prime minister, reportedly got by on just four hours' sleep a night. Such deprivation would trouble many people, and certainly the French, who sleep for nearly nine hours on average, according to a report by the OECD. True to stereotype, the French also spend the most time eating and drinking of OECD members—indeed, they eat for almost twice as long as the Americans. The Japanese appear to have a tough time of it, working by far the longest hours. However, they also devote less time to unpaid work such as household chores and childcare, activities that account for around one third of the OECD's GDP."
+            ></textarea>
+          </div>
+          <div className='row'>
+          <div className='btn' onClick={this.inputArticle.bind(this)}>Input</div>
+          </div>
+          
+        </div>)
+    }else if(this.state.columnDefs==undefined && this.state.rowData==undefined){
+      return (<div className='home' style={{marginLeft: 50, marginRight: 50}}>
+            <div className='row' style={{margin: 0}}>
+              <h3>Input your data.</h3>
+              <p>CSV is supported now.</p>
+            </div>
+            <div className='row' style={{margin: 0}}>
+              <input id='data_input_area' type='file'></input>
+            </div>
+            <div className='row'>
+            <div className='btn' onClick={this.inputData.bind(this)}>Input</div>
+            </div>
+          
+        </div>)
+    }else{
+      return (
+        <div className='home'>
+          <div className='row upper' style={{margin: 0}}>
+            <div className='col s6 datatable'>
+              <DataTable mother_state={this.state} mother_this={this}></DataTable>
+            </div>
+            <div className='col s6 article'>
+              <Article mother_state={this.state} mother_this={this}></Article>
+            </div>
+          </div>
+          
+          <div className='col s12 bottom'>
+            <Annotation mother_state={this.state} mother_this={this}></Annotation>
+          </div>
+        </div>)
+    }
+    }
+    
 }
 
 export default Home;

@@ -217,6 +217,7 @@ class Annotation extends Component{
 
     double_target_change_canditype(cls){
         var _this = this
+        console.log(cls)
         // if(this.props.mother_state.candidate_option_double_target=='ratio'){
             this.props.mother_this.setState({candidate_option_double_target: cls}, function(){
                 _this.props.mother_this.generate_candidate_statements()
@@ -590,6 +591,17 @@ class Annotation extends Component{
         }
     }
 
+    exportQueries(){
+        const a = document.createElement("a");
+        var export_dict = {}
+        export_dict['rows'] = JSON.parse(JSON.stringify(this.props.mother_state.rowData))
+        export_dict['queries'] = JSON.parse(JSON.stringify(this.props.mother_state.list))
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(export_dict, null, 4));
+        a.setAttribute("download", "export.json");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
     
 
     render(){
@@ -609,6 +621,9 @@ class Annotation extends Component{
             <div style={{padding:'10px'}}>
                 {this.props.mother_state.action_state=='idle' && this.props.mother_state.selected_list==false && <div>
                     <div className='btn' onClick={this.startSelecting.bind(this)}>Click to add a new statement.</div>
+                    {Object.keys(this.props.mother_state.list).length>0 && 
+                        <div className='btn' onClick={this.exportQueries.bind(this)}>Click to export queries.</div>    
+                    }
                 </div>}
 
                 {this.props.mother_state.action_state=='to_select_text' && <div>
